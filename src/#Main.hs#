@@ -7,8 +7,6 @@ import Data.Aeson.Types
 import GHC.Generics
 import Control.Monad.IO.Class
 
-
-
 data Point = Point {
     x :: Int,
     y :: Int

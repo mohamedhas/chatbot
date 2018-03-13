@@ -1,4 +1,4 @@
-module Replay (run, ask, io, Replay, Trace, emptyTrace, addAnswer) where
+module Replay (run, ask, io, Replay, ReplayT, Trace, emptyTrace, addAnswer) where
 
 import System.IO.Unsafe
 import Control.Applicative (Applicative(..))
@@ -58,48 +58,3 @@ ask qst = do
 
 run :: (Monad m) => ReplayT m q r a -> Trace r -> m (Either (q, Trace r) a)
 run replay trace = runExceptT (evalStateT replay trace)
-
-data HtmlPage = HtmlPage {
-                          head :: String,
-                          body :: [Form]
-                        } deriving (Show, Read)
-data Tag = CForm Form
-    deriving (Show, Read)
-
-data Form = Form [Input]
-    deriving (Show, Read)
-
-data Input = {
-    typeInput :: String,
-    name :: String
-}
-
-getForms :: Text -> [Form]
-
-getInputs :: Form -> [Input]
-
-getAnswers :: ActionM (Trace Answers)
-getAnswers = params >>= fmap Answers >>= return
-
-printTrace :: Trace Answers -> Form
-printTrace trace  = concat $ ( "<form id=\"trace\">" ++ $ fmap
-      (\x -> "<input type=\"hidden\" id=\"" ++ unpack $ fst x ++
-            "\"" "value=\"" ++ unpack $ snd x ++ "\"") fst trace ) ++ "</form>"
-
-getReult :: Form -> Trace Form
-getReult form = filter (~=="<input") $ dropWhile  (~/="<form") rslt
-
-type Web a = Replay Form Answers a
-
-Type Input = Text
-
-type Form = Text
-
-type Answers = (Text, Text)
-
-runWeb :: Web Text -> ActionM ()
-runWeb web = liftIO $ do
-  rslt <-  run web emptyTrace
-  case rslt of
-    (Right page)         -> html (page)
-    (Left (form, trace)) -> case () of
