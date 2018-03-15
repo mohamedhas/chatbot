@@ -10,6 +10,7 @@ import Data.Aeson.Types
 import Database.PostgreSQL.ORM
 import Database.PostgreSQL.Simple.Internal
 import Database.PostgreSQL.Simple
+import LIO.TCB
 import DB
 
 data UsersPrv = UsersPrv {
@@ -23,6 +24,16 @@ data UsersPrv = UsersPrv {
 instance Model UsersPrv where
   modelInfo = defaultModelInfo { modelTable = "usersprv" }
 
+
+getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC Prv
+getPrevilegeDB ident = do
+    id  <-  unlabel ident
+    ioTCB $ getDataBasedOnUserId id (read . previlege)
+
+
+
+
+{-
 getPrevilegeDB :: LIO ACC ( Labeled ACC Int ) -> LIOState ACC -> IO Prv--(Maybe String)
 getPrevilegeDB ident st = do
     id <- evalLIO (ident >>= \x -> unlabel x) st
@@ -34,7 +45,6 @@ getPrevilegeDB ident st = do
       (x:xs) -> return $ read (previlege x)
 
 
-{-
 getUserPrevilege :: Labeled ACC Int -> LIO ACC (IO Prv)
 getPrevilegeDB ident st = do
     id <- unlabel ident
