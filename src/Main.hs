@@ -57,7 +57,7 @@ tryWithDiffrentEntities [] = nonUnderstandingHandler
 tryWithDiffrentEntities (x:xs) = do
     env <- ask
     usrId <- lift $ lift (getUserId (txtmsg env ) )
-    lastCtxt <- lift $ lift $ getLastContextDB usrId -- get Last State of the user 
+    lastCtxt <- lift $ lift $ getLastContextDB usrId -- get Last State of the user
     --TODO improve code quality
     case lastCtxt of
       QuestionnaireCtx -> if (isRequestEntities $ entity x) then nonUnderstandingHandler -- we test if msg fit in the last state we were in
@@ -100,20 +100,6 @@ data Entity = Entity {
   value :: String
 } deriving (Show, Generic)
 
-
-
-          --message <- lift $ liftLIO (unlabelP prv msg)
-
-{-
-runProcess :: (Show a) =>  Process m a -> UserId -> IO ()
-runProcess p txtMsg= do
-  prv <- getPrevilegeDB (label H (userid txtMsg))
-                               (LIOState {lioLabel = H, lioClearance = H})
-  rslt <- ( runExceptT $ runReaderT (St prv) p)
-  putStrLn "test"
-
-
--}
 
 
 main :: IO ()
