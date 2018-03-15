@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Replay (run, ask, io, Replay, ReplayT, Trace, emptyTrace, addAnswer) where
+module Replay (run, ask, io, Replay, ReplayT, Trace,
+               emptyTrace, addAnswer, Item) where
 
 import System.IO.Unsafe
 import Control.Applicative (Applicative(..))
@@ -8,11 +9,15 @@ import Control.Monad       (liftM, ap)
 import Control.Monad.Trans.State.Lazy
 import Control.Monad.Trans.Class
 import Control.Monad.Except
-import Web.Scotty     (ActionM, scotty, get, post, rescue, html, param)
 import Data.Text.Lazy (Text)
 import DB
 
 {- i ve transformed the trace to a tuple of "(originalTrace, newTrace)" -}
+type Trace r = ([Item r], [Item r])
+
+data Item r = Answer r | Result String
+  deriving (Show, Read)
+
 
 emptyTrace :: Trace r
 emptyTrace = ([], [])

@@ -7,6 +7,7 @@ import Data.Aeson.Types
 import GHC.Generics
 import Control.Monad.IO.Class
 import Control.Monad.Reader
+import DB
 
 data St = St {
   previlege :: Prv
@@ -14,17 +15,26 @@ data St = St {
 
 type Process m a = ReadT St (ExceptT a m)
 
+getPrevilegeDB :: LIO ACC ( Labeled ACC Int ) -> LIOState ACC -> IO Prv
+
+runProcess :: (Show a) =>  Process m a -> TxtMessage -> IO ()
+runProcess p txtMsg= do
+  prv <- getPrevilegeDB (label H (userid txtMsg))
+                               (LIOState {lioLabel = H, lioClearance = H})
+  rslt <- ( runExceptT $ runReaderT (St prv) p)
+  putStrLn "test"
+
+
 getContext :: ( Labeled ACC TxtMessage ) -> Process IO (Lio ACC Context)
 getContext msg = do
   prv     <- asks previlege
   message <- liftLIO (unlabelP prv msg)
   userid
 
-type UserId  = Int
 
 getLastContxt :: Labeled ACC UserId -> Process IO (Lio ACC Context)
 getLastContxt id = do
-  
+
 
 
 data Point = Point {
