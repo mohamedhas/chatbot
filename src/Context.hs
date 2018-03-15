@@ -35,7 +35,10 @@ isRequestEntities entty = case (lookup entty requestResponse) of
                             Nothing -> False
                             _       -> True
 
-
+modifyLastContext :: Labeled ACC LastContext -> LIO ACC String
+modifyLastContext lastContext = do
+  ctx <- unlabel lastContext
+  ioTCB $ connect connectionInfo >>= \x -> save x ctx >>= \y -> return $ show y
 
 getLastContextDB ::  ( Labeled ACC UserId ) -> LIO ACC Context
 getLastContextDB ident = do

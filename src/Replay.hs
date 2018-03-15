@@ -11,6 +11,8 @@ import Control.Monad.Trans.Class
 import Control.Monad.Except
 import Data.Text.Lazy (Text)
 import DB
+import LIO.Core
+import Lattice
 
 {- i ve transformed the trace to a tuple of "(originalTrace, newTrace)" -}
 type Trace r = ([Item r], [Item r])
@@ -47,7 +49,10 @@ liftR i = do
     ((Result rslt):trace, output) -> put (trace, output ++ [(Result rslt)]) >>=
                                       \_ -> return $ read rslt
 
-io :: (Show a, Read a) => IO a -> Replay q r a
+-- io :: (Show a, Read a) => IO a -> Replay q r a
+-- io i = liftR i
+
+io :: (Show a, Read a) => LIO ACC a -> ReplayT (LIO ACC) q r a
 io i = liftR i
 
 ask :: (Monad m) => q -> ReplayT m q r r

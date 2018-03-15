@@ -12,6 +12,7 @@ import Database.PostgreSQL.ORM
 import Database.PostgreSQL.Simple.Internal
 import Database.PostgreSQL.Simple
 import LIO.TCB
+import Context
 import DB
 
 
@@ -44,6 +45,10 @@ parseTrace qstTrace = ( (read (trace qstTrace)), [])
 instance Model QstTrace where
   modelInfo = defaultModelInfo { modelTable = "qst_trace" }
 
+clearTrace :: Labeled ACC QstTrace -> LIO ACC (Either ValidationError Bool)
+clearTrace trace = do
+    trace' <- unlabel trace
+    ioTCB $ connect connectionInfo >>= \x -> destroy x trace'
 
 getTraceDB ::  ( Labeled ACC UserId ) -> LIO ACC QstTrace
 getTraceDB ident = do
@@ -52,9 +57,10 @@ getTraceDB ident = do
 
 type Questionnaire = ReplayT (LIO ACC) String String String
 
-questionnaireExample :: Questionnaire
-questionnaireExample = do
+questionnaireExample :: Labeled ACC LastContext -> Questionnaire
+questionnaireExample lastCtxt = do
   ask "hello, can i ask you some questions ?"
   ask "which service do you use the most ?"
   ask "can you rate this service ?"
+  io (modifyLastContext lastCtxt)
   ask "thank you"
