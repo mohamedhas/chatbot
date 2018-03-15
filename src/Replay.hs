@@ -50,7 +50,7 @@ liftR i = do
 io :: (Show a, Read a) => IO a -> Replay q r a
 io i = liftR i
 
-ask :: q -> Replay q r r
+ask :: (Monad m) => q -> ReplayT m q r r
 ask qst = do
   trace' <- get
   case trace' of

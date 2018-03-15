@@ -48,13 +48,14 @@ instance Model QstTrace where
   modelInfo = defaultModelInfo { modelTable = "qst_trace" }
 
 
-getTraceDB ::  ( Labeled ACC UserId ) -> LIO ACC (Trace String)
+getTraceDB ::  ( Labeled ACC UserId ) -> LIO ACC QstTrace
 getTraceDB ident = do
     id  <-  unlabel ident
-    ioTCB $ getDataBasedOnUserId id parseTrace
+    ioTCB $ getDataBasedOnUserId id (\x -> x)
 
-type Questionnaire = Replay String String String
+type Questionnaire = ReplayT (LIO ACC) String String String
 
+questionnaireExample :: Questionnaire
 questionnaireExample = do
   ask "hello, can i ask you some questions ?"
   ask "which service do you use the most ?"
