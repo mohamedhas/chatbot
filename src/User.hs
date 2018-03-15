@@ -20,7 +20,6 @@ data UsersPrv = UsersPrv {
 } deriving (Show, Generic)
 
 
-
 instance Model UsersPrv where
   modelInfo = defaultModelInfo { modelTable = "usersprv" }
 
@@ -29,27 +28,3 @@ getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC Prv
 getPrevilegeDB ident = do
     id  <-  unlabel ident
     ioTCB $ getDataBasedOnUserId id (read . previlege)
-
-
-
-
-{-
-getPrevilegeDB :: LIO ACC ( Labeled ACC Int ) -> LIOState ACC -> IO Prv--(Maybe String)
-getPrevilegeDB ident st = do
-    id <- evalLIO (ident >>= \x -> unlabel x) st
-    cnx <- connect connectionInfo
-    list <- dbSelect cnx $ addWhere "userid = ?" (Only id) $
-                      (modelDBSelect :: DBSelect UsersPrv)
-    case list of
-      []     -> return $ error "undifined"
-      (x:xs) -> return $ read (previlege x)
-
-
-getUserPrevilege :: Labeled ACC Int -> LIO ACC (IO Prv)
-getPrevilegeDB ident st = do
-    id <- unlabel ident
-    return $ ( do
-        cnx <- connect connectionInfo
-        dbSelect
-        dbSelect cnx $ addWhere_  ()"userId = " ++ show id) modelDBSelect --(mkDBRef (UsersPrv { userId = id}) )
--}
