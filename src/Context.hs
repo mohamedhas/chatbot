@@ -43,7 +43,12 @@ modifyLastContext lastContext = do
 getLastContextDB ::  ( Labeled ACC UserId ) -> LIO ACC Context
 getLastContextDB ident = do
     iden  <-  unlabel ident
-    ioTCB $ getDataBasedOnUserId iden read
+    ioTCB $ getDataBasedOnUserId iden (\x -> read (context x) )
+
+getLastContextObjDB ::  ( Labeled ACC UserId ) -> LIO ACC LastContext
+getLastContextObjDB ident = do
+    iden  <-  unlabel ident
+    ioTCB $ getDataBasedOnUserId iden id
 
 
 

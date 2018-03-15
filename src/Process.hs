@@ -23,11 +23,20 @@ data St = St {
   txtmsg :: Labeled ACC TxtMessage
 }
 
+liftLio :: LIO ACC a -> Process a
+liftLio computation = lift $ lift computation
+
 getUserId :: Labeled ACC TxtMessage -> LIO ACC (Labeled ACC UserId)
 getUserId msg = do
   rslt <- unlabel msg
   l <- getClearance
   label l (userid rslt)
+
+getField :: (b -> a) -> Labeled ACC b -> LIO ACC (Labeled ACC a)
+getField f v = do
+  rslt <- unlabel v
+  l <- getClearance
+  label l (f rslt)
 
 
 -- a Monad that process the messages then it try to get a the best response
@@ -68,6 +77,23 @@ tryWithDiffrentEntities (x:xs) = do
 runQuestionnaire :: Process String
 runQuestionnaire = do
   env <- ask
+  usrId    <- liftLio (getUserId (txtmsg env ) )
+  qstTrace <- liftLio $ getTraceDB usrId
+  message  <- liftLio $ unlabel (txtmsg env)
+  lastCtxt <- liftLio (getLastContextObjDB usrId >>=
+                                        \x -> getClearance >>= \y -> label y x)
+  let trace = parseTrace $ addQstAnswer (msg message) qstTrace
+  rslt <- lift $ lift $ run (questionnaireExample lastCtxt) trace
+  case rslt of
+    Left rslt  -> return $ fst rslt
+    Right rslt -> nonUnderstandingHandler
+
+
+
+{-
+runQuestionnaire :: Process String
+runQuestionnaire = do
+  env <- ask
   usrId <- lift $ lift (getUserId (txtmsg env ) )
   qstTrace <- lift $ lift $ getTraceDB usrId
   message <- lift $ lift $ unlabel (txtmsg env)
@@ -76,9 +102,9 @@ runQuestionnaire = do
   case rslt of
     Left rslt  -> return $ fst rslt
     Right rslt -> nonUnderstandingHandler
+-}
 
-
-runProcess :: TxtMessage -> Process String -> IO ()
+runProcess :: TxtMessage -> Process String -> IO String
 runProcess msg process = do
   let lioSt = LIOState {lioLabel = H, lioClearance = H}
   uId <- evalLIO (label L (userid msg)) lioSt
@@ -87,5 +113,5 @@ runProcess msg process = do
   st   <- evalLIO (label l msg ) userState
   rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
   case rslt of
-    Left rslt  -> putStrLn rslt
-    Right rslt -> putStrLn rslt
+    Left rslt  -> return rslt
+    Right rslt -> return rslt

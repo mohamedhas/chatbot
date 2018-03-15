@@ -2,9 +2,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main where
-import Web.Scotty     (ActionM, scotty, get, post, rescue, html, param, jsonData)
-{-
+import Web.Scotty     (ActionM, scotty, get, post, liftAndCatchIO,
+                                    rescue, html, param, jsonData)
 import Data.Aeson.Types
+{-
 import GHC.Generics
 import Control.Monad.IO.Class
 import Control.Monad.Reader
@@ -21,7 +22,8 @@ import DB
 import User
 -}
 import Process
---import TxtMessage
+import TxtMessage
+import Data.Text.Lazy
 -- the
 
 -- the program will recivie a json object, parse it and then it will process it
@@ -33,4 +35,4 @@ main = scotty 3000 $ do
     serve :: ActionM ()
     serve = do
         rslt <- jsonData :: ActionM TxtMessage
-        liftIO $ runProcess rslt getResponse
+        (liftAndCatchIO $ runProcess rslt getResponse) >>= \x -> html $ pack x
