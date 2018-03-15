@@ -36,10 +36,7 @@ addQstResult :: String -> QstTrace -> QstTrace
 addQstResult answr qstTrace =
   modifyTrace (read ((read (trace qstTrace)) ++
                                     (read $ "Result " ++ answr) )) qstTrace
-{-
-parseTrace :: QstTrace -> Trace String
-parseTrace qstTrace = ((map (read) (trace qstTrace)), [])
--}
+
 
 parseTrace :: QstTrace -> Trace String
 parseTrace qstTrace = ( (read (trace qstTrace)), [])

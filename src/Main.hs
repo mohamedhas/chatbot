@@ -18,10 +18,10 @@ import Lattice
 import Questionnaire
 import Context
 import DB
-
+import User
 -- the
 data St = St {
-  previlege :: Prv,
+  --previlege :: Prv,
   txtmsg :: Labeled ACC TxtMessage
 }
 
@@ -80,6 +80,19 @@ runQuestionnaire = do
     Right rslt -> nonUnderstandingHandler
 
 
+runProcess :: TxtMessage -> Process String -> IO ()
+runProcess msg process = do
+  let lioSt = LIOState {lioLabel = H, lioClearance = H}
+  uId <- evalLIO (label L (userid msg)) lioSt
+  l   <- evalLIO (getPrevilegeDB uId ) lioSt
+  let userState = LIOState {lioLabel = H, lioClearance = l}
+  st   <- evalLIO (label l msg ) userState
+  rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
+  case rslt of
+    Left rslt  -> putStrLn rslt
+    Right rslt -> putStrLn rslt
+
+
 -- Recived message
 data TxtMessage = TxtMessage {
   msg :: String,
@@ -100,8 +113,12 @@ data Entity = Entity {
   value :: String
 } deriving (Show, Generic)
 
+instance FromJSON Entity
+instance FromJSON NLP
+instance FromJSON TxtMessage -- parse json object to msg object
 
 
+-- the program will recivie a json object, parse it and then it will process it
 main :: IO ()
 main = scotty 3000 $ do
     get "/" serve
@@ -109,5 +126,5 @@ main = scotty 3000 $ do
   where
     serve :: ActionM ()
     serve = do
-        --rslt <- jsonData :: ActionM Point
-        liftIO $ putStrLn "hello" -- $ show rslt
+        rslt <- jsonData :: ActionM TxtMessage
+        liftIO $ runProcess rslt getResponse

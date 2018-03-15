@@ -15,7 +15,7 @@ import DB
 
 data UsersPrv = UsersPrv {
   dbkey :: !DBKey,
-  userid :: !Int,
+  usrid :: !Int,
   previlege :: String
 } deriving (Show, Generic)
 
@@ -24,7 +24,7 @@ instance Model UsersPrv where
   modelInfo = defaultModelInfo { modelTable = "usersprv" }
 
 
-getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC Prv
+getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC ACC
 getPrevilegeDB ident = do
     id  <-  unlabel ident
     ioTCB $ getDataBasedOnUserId id (read . previlege)
