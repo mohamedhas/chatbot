@@ -54,3 +54,9 @@ getTraceDB ident = do
     ioTCB $ getDataBasedOnUserId id parseTrace
 
 type Questionnaire = Replay String String String
+
+questionnaireExample = do
+  ask "hello, can i ask you some questions ?"
+  ask "which service do you use the most ?"
+  ask "can you rate this service ?"
+  ask "thank you"
