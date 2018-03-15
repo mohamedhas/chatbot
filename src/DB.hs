@@ -11,6 +11,15 @@ import GHC.Generics
 
 type UserId  = Int
 
+getDataBasedOnUserId :: (Model a) => UserId -> (a -> b) -> IO b
+getDataBasedOnUserId id parse =  do
+             cnx <- connect connectionInfo
+             list <- dbSelect cnx $ addWhere "user_id = ?" (Only id) $
+                  (modelDBSelect)
+             case list of
+                []     -> return $ error "undifined"
+                (x:xs) -> return $ parse x
+
 connectionInfo = ConnectInfo {connectHost = "localhost",
                               connectPort = 5432,
                               connectUser = "admin",
