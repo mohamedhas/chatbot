@@ -13,11 +13,14 @@ data St = St {
   previlege :: Prv
 }
 
-type Process m a = ReadT St (ExceptT a m)
+type Process a = ReaderT St (ExceptT a (LIO ACC))
 
-getPrevilegeDB :: LIO ACC ( Labeled ACC Int ) -> LIOState ACC -> IO Prv
+getResponse :: Labeled TxtMessage -> Process String
+getResponse msg = do
+    prv     <- asks previlege
+    message <- lift $ liftLIO (unlabelP prv msg)
 
-runProcess :: (Show a) =>  Process m a -> TxtMessage -> IO ()
+runProcess :: (Show a) =>  Process m a -> UserId -> IO ()
 runProcess p txtMsg= do
   prv <- getPrevilegeDB (label H (userid txtMsg))
                                (LIOState {lioLabel = H, lioClearance = H})
