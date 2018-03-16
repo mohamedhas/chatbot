@@ -15,7 +15,7 @@ import DB
 
 data UsersPrv = UsersPrv {
   dbkey :: !DBKey,
-  usrid :: !Int,
+  user_id :: !Int,
   previlege :: String
 } deriving (Show, Generic)
 

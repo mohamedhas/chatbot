@@ -55,7 +55,7 @@ getResponse = do
       case entity_ of
         [] -> nonUnderstandingHandler -- if the nlp failed to understand the msg the admin will respond to the request
         xs -> tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
-      return "k"
+      --return "k"
 
 -- nlp can produce a list of possible meaning, so we will try them all for now.
 -- the algorithm can be improved
@@ -67,7 +67,8 @@ tryWithDiffrentEntities (x:xs) = do
     lastCtxt <- lift $ lift $ getLastContextDB usrId -- get Last State of the user
     --TODO improve code quality
     case lastCtxt of
-      QuestionnaireCtx -> if (isRequestEntities $ entity x) then nonUnderstandingHandler -- we test if msg fit in the last state we were in
+      QuestionnaireCtx -> if (isRequestEntities $ entity x)
+                              then nonUnderstandingHandler -- we test if msg fit in the last state we were in
                               else runQuestionnaire
       Request -> case (lookup (entity x) requestResponse) of
           Nothing   -> tryWithDiffrentEntities xs
@@ -106,10 +107,10 @@ runQuestionnaire = do
 
 runProcess :: TxtMessage -> Process String -> IO String
 runProcess msg process = do
-  let lioSt = LIOState {lioLabel = H, lioClearance = H}
+  let lioSt = LIOState {lioLabel = L, lioClearance = L}
   uId <- evalLIO (label L (userid msg)) lioSt
   l   <- evalLIO (getPrevilegeDB uId ) lioSt
-  let userState = LIOState {lioLabel = H, lioClearance = l}
+  let userState = LIOState {lioLabel = L, lioClearance = l}
   st   <- evalLIO (label l msg ) userState
   rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
   case rslt of

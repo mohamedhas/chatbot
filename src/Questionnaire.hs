@@ -38,9 +38,11 @@ addQstResult answr qstTrace =
   modifyTrace (read ((read (trace qstTrace)) ++
                                     (read $ "Result " ++ answr) )) qstTrace
 
+parseItemList :: String -> [(Item String)]
+parseItemList str = read str
 
 parseTrace :: QstTrace -> Trace String
-parseTrace qstTrace = ( (read (trace qstTrace)), [])
+parseTrace qstTrace = ( (parseItemList (trace qstTrace)), [])
 
 instance Model QstTrace where
   modelInfo = defaultModelInfo { modelTable = "qst_trace" }
@@ -59,6 +61,7 @@ type Questionnaire = ReplayT (LIO ACC) String String String
 
 questionnaireExample :: Labeled ACC LastContext -> Questionnaire
 questionnaireExample lastCtxt = do
+  ask "start"
   ask "hello, can i ask you some questions ?"
   ask "which service do you use the most ?"
   ask "can you rate this service ?"

@@ -16,7 +16,7 @@ import DB
 
 
 data LastContext = LastContext {
-  dbkey :: !DBKey,
+  dbkey   :: !DBKey,
   user_id :: !Int,
   context :: String
 } deriving (Show, Generic)
@@ -53,4 +53,4 @@ getLastContextObjDB ident = do
 
 
 instance Model LastContext where
-  modelInfo = defaultModelInfo { modelTable = "Last_context" }
+  modelInfo = defaultModelInfo { modelTable = "last_context" }
