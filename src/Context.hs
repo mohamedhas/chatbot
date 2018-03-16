@@ -23,6 +23,7 @@ data LastContext = LastContext {
 
 data Context = QuestionnaireCtx | Request deriving (Show, Read)
 
+
 -- TODO Implement a database for the requestEntities and requestResponse
 -- requestEntities represent the requests that the bot can answer
 requestEntities = ["food", "wifi password", "location"]

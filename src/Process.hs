@@ -83,10 +83,12 @@ runQuestionnaire = do
   message  <- liftLio $ unlabel (txtmsg env)
   lastCtxt <- liftLio (getLastContextObjDB usrId >>=
                                         \x -> getClearance >>= \y -> label y x)
-  let trace = parseTrace $ addQstAnswer (msg message) qstTrace
-  rslt <- lift $ lift $ run (questionnaireExample lastCtxt) trace
+  let trace' = addQstAnswer (msg message) qstTrace
+  rslt <- lift $ lift $ run (questionnaireExample lastCtxt) (read $ trace trace')
   case rslt of
-    Left rslt  -> return $ fst rslt
+    Left rslt  -> do
+      liftLio $ saveTrace (modifyTrace (snd rslt) qstTrace)
+      return $ fst rslt
     Right rslt -> nonUnderstandingHandler
 
 

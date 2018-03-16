@@ -31,7 +31,7 @@ modifyTrace answr qstTrace =
 
 addQstAnswer :: String -> QstTrace -> QstTrace
 addQstAnswer answr qstTrace =
-                modifyTrace (addAnswer (read (trace qstTrace)) answr) qstTrace
+                modifyTrace (addAnswer (parseTrace (trace qstTrace)) answr) qstTrace
 
 addQstResult :: String -> QstTrace -> QstTrace
 addQstResult answr qstTrace =
@@ -41,8 +41,8 @@ addQstResult answr qstTrace =
 parseItemList :: String -> [(Item String)]
 parseItemList str = read str
 
-parseTrace :: QstTrace -> Trace String
-parseTrace qstTrace = ( (parseItemList (trace qstTrace)), [])
+parseTrace :: String -> Trace String
+parseTrace qstTrace = read qstTrace --( (parseItemList (trace qstTrace)), [])
 
 instance Model QstTrace where
   modelInfo = defaultModelInfo { modelTable = "qst_trace" }
@@ -56,6 +56,10 @@ getTraceDB ::  ( Labeled ACC UserId ) -> LIO ACC QstTrace
 getTraceDB ident = do
     id  <-  unlabel ident
     ioTCB $ getDataBasedOnUserId id (\x -> x)
+
+saveTrace ::  QstTrace -> LIO ACC QstTrace
+saveTrace ctx = do
+  ioTCB $ connect connectionInfo >>= \x -> save x ctx -- >>= \y -> return $ show y
 
 type Questionnaire = ReplayT (LIO ACC) String String String
 
