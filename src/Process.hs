@@ -54,7 +54,9 @@ getResponse = do
       --TODO improve code quality
       case entity_ of
         [] -> nonUnderstandingHandler -- if the nlp failed to understand the msg the admin will respond to the request
-        xs -> tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
+        xs -> if ((entity $ head xs) == "askQuestionnaire" )
+         then askQuestionnaire (read $ value $ head entity_)
+         else tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
       --return "k"
 
 -- nlp can produce a list of possible meaning, so we will try them all for now.
@@ -91,6 +93,15 @@ runQuestionnaire = do
       return $ fst rslt
     Right rslt -> nonUnderstandingHandler
 
+askQuestionnaire :: UserId -> Process String
+askQuestionnaire id = do
+  env <- ask
+  usrId    <- liftLio (getClearance >>= \x -> (label x id) )
+  message  <- liftLio $ unlabel (txtmsg env)
+  lastCtxt <- liftLio (getLastContextObjDB usrId >>=
+                                        \x -> getClearance >>= \y -> label y x)
+  liftLio $ modifyLastContext_ lastCtxt
+  return "done"
 
 
 {-
@@ -112,7 +123,7 @@ runProcess msg process = do
   let lioSt = LIOState {lioLabel = L, lioClearance = L}
   uId <- evalLIO (label L (userid msg)) lioSt
   l   <- evalLIO (getPrevilegeDB uId ) lioSt
-  let userState = LIOState {lioLabel = L, lioClearance = l}
+  let userState = LIOState {lioLabel = l, lioClearance = L}
   st   <- evalLIO (label l msg ) userState
   rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
   case rslt of
