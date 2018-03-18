@@ -15,6 +15,7 @@ import Context
 import DB
 import User
 import TxtMessage
+import LIO.Label
 import Replay (run, Replay, ReplayT, Trace,
                emptyTrace, addAnswer, Item)
 
@@ -55,7 +56,7 @@ getResponse = do
       case entity_ of
         [] -> nonUnderstandingHandler -- if the nlp failed to understand the msg the admin will respond to the request
         xs -> if ((entity $ head xs) == "askQuestionnaire" )
-         then askQuestionnaire (read $ value $ head entity_)
+         then askQuestionnaire 3--(read $ value $ head entity_)
          else tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
       --return "k"
 
@@ -100,8 +101,15 @@ askQuestionnaire id = do
   message  <- liftLio $ unlabel (txtmsg env)
   lastCtxt <- liftLio (getLastContextObjDB usrId >>=
                                         \x -> getClearance >>= \y -> label y x)
-  liftLio $ modifyLastContext_ lastCtxt
-  return "done"
+  --liftLio $ modifyLastContext_ lastCtxt
+  l <- liftLio getClearance
+  if (canFlowTo l H) then do
+                          liftLio (modifyLastContext_ lastCtxt)
+                          return "done"
+                     else return "you are not an admin"
+  --return $ evalLIO (modifyLastContext_ lastCtxt)
+  --          (LIOState {lioLabel = l, lioClearance = H})
+
 
 
 {-
@@ -123,7 +131,7 @@ runProcess msg process = do
   let lioSt = LIOState {lioLabel = L, lioClearance = L}
   uId <- evalLIO (label L (userid msg)) lioSt
   l   <- evalLIO (getPrevilegeDB uId ) lioSt
-  let userState = LIOState {lioLabel = l, lioClearance = L}
+  let userState = LIOState {lioLabel = l, lioClearance = H}
   st   <- evalLIO (label l msg ) userState
   rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
   case rslt of
