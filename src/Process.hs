@@ -20,7 +20,7 @@ import Replay (run, Replay, ReplayT, Trace,
                emptyTrace, addAnswer, Item)
 
 data St = St {
-  --previlege :: Prv,
+  previlege :: Prv,
   txtmsg :: Labeled ACC TxtMessage
 }
 
@@ -84,8 +84,8 @@ runQuestionnaire = do
   usrId    <- liftLio (getUserId (txtmsg env ) )
   qstTrace <- liftLio $ getTraceDB usrId
   message  <- liftLio $ unlabel (txtmsg env)
-  lastCtxt <- liftLio (getLastContextObjDB usrId >>=
-                                        \x -> getClearance >>= \y -> label y x)
+  lastCtxt <- liftLio (getLastContextObjDB usrId) -- >>=
+                                        -- \x -> getClearance >>= \y -> label y x)
   let trace' = addQstAnswer (msg message) qstTrace
   rslt <- lift $ lift $ run (questionnaireExample lastCtxt) (read $ trace trace')
   case rslt of
@@ -96,17 +96,17 @@ runQuestionnaire = do
 
 askQuestionnaire :: UserId -> Process String
 askQuestionnaire id = do
-  env <- ask
+  env <- asks txtmsg
   usrId    <- liftLio (getClearance >>= \x -> (label x id) )
-  message  <- liftLio $ unlabel (txtmsg env)
-  lastCtxt <- liftLio (getLastContextObjDB usrId >>=
-                                        \x -> getClearance >>= \y -> label y x)
+  --message  <- liftLio $ unlabel (txtmsg env)
+  lastCtxt <- liftLio (getLastContextObjDB usrId)
+                                      --  \x -> getClearance >>= \y -> label y x)
   --liftLio $ modifyLastContext_ lastCtxt
-  l <- liftLio getClearance
-  if (canFlowTo l H) then do
-                          liftLio (modifyLastContext_ lastCtxt)
-                          return "done"
-                     else return "you are not an admin"
+  --l <- liftLio getClearance
+  --if (canFlowTo l H) then do
+  liftLio (modifyLastContext_ lastCtxt)
+                        --  return "done"
+                     --else return "you are not an admin"
   --return $ evalLIO (modifyLastContext_ lastCtxt)
   --          (LIOState {lioLabel = l, lioClearance = H})
 
@@ -124,16 +124,24 @@ runQuestionnaire = do
   case rslt of
     Left rslt  -> return $ fst rslt
     Right rslt -> nonUnderstandingHandler
+
+    uId <- evalLIO (label L (userid msg)) lioSt
+    l   <- evalLIO (getPrevilegeDB uId ) lioSt
+    let userState = LIOState {lioLabel = L, lioClearance = L}
+    st   <- evalLIO (label L msg ) userState
 -}
+
+runProcess_ :: TxtMessage -> Process String -> LIO ACC String
+runProcess_ msg process = do
+  uId <- label L (userid msg)
+  prv <- getPrevilegeDB uId
+  message <- label L msg
+  rs <- runExceptT (runReaderT process (St {txtmsg = message, Process.previlege = prv}))
+  case rs of
+    Left rslt  -> return rslt
+    Right rslt -> return rslt
 
 runProcess :: TxtMessage -> Process String -> IO String
 runProcess msg process = do
   let lioSt = LIOState {lioLabel = L, lioClearance = L}
-  uId <- evalLIO (label L (userid msg)) lioSt
-  l   <- evalLIO (getPrevilegeDB uId ) lioSt
-  let userState = LIOState {lioLabel = l, lioClearance = H}
-  st   <- evalLIO (label l msg ) userState
-  rslt <- evalLIO  ( runExceptT (runReaderT process (St st)) ) userState
-  case rslt of
-    Left rslt  -> return rslt
-    Right rslt -> return rslt
+  evalLIO  (runProcess_ msg process) lioSt

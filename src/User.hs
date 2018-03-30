@@ -24,7 +24,7 @@ instance Model UsersPrv where
   modelInfo = defaultModelInfo { modelTable = "usersprv" }
 
 
-getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC ACC
+getPrevilegeDB ::  ( Labeled ACC UserId ) -> LIO ACC Prv
 getPrevilegeDB ident = do
     id  <-  unlabel ident
     ioTCB $ getDataBasedOnUserId id (read . previlege)

@@ -69,5 +69,5 @@ questionnaireExample lastCtxt = do
   ask "hello, can i ask you some questions ?"
   ask "which service do you use the most ?"
   ask "can you rate this service ?"
-  io (modifyLastContext lastCtxt)
+  io (modifyLastContext lastCtxt AdminPriv)
   ask "thank you"

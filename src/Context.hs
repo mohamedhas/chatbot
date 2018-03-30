@@ -36,9 +36,9 @@ isRequestEntities entty = case (lookup entty requestResponse) of
                             Nothing -> False
                             _       -> True
 
-modifyLastContext :: Labeled ACC LastContext -> LIO ACC String
-modifyLastContext lastContext = do
-  ctx <- unlabel lastContext
+modifyLastContext :: Labeled ACC LastContext -> Prv -> LIO ACC String
+modifyLastContext lastContext p = do
+  ctx <- unlabelP (PrivTCB p) lastContext
   ioTCB $ connect connectionInfo >>= \x -> save x (ctx {context = "Request"})
                                             >>= \y -> return $ show y
 
@@ -53,11 +53,13 @@ getLastContextDB ident = do
     iden  <-  unlabel ident
     ioTCB $ getDataBasedOnUserId iden (\x -> read (context x) )
 
-getLastContextObjDB ::  ( Labeled ACC UserId ) -> LIO ACC LastContext
+getLastContextObjDB ::  ( Labeled ACC UserId ) -> LIO ACC (Labeled ACC LastContext)
 getLastContextObjDB ident = do
     iden  <-  unlabel ident
-    ioTCB $ getDataBasedOnUserId iden id
-
+    lastCtxt <- ioTCB $ getDataBasedOnUserId iden id
+    p <- label H lastCtxt
+    setLabelP (PrivTCB AdminPriv) L
+    return p
 
 
 instance Model LastContext where
