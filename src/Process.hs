@@ -56,13 +56,13 @@ getResponse = do
       case entity_ of
         [] -> nonUnderstandingHandler -- if the nlp failed to understand the msg the admin will respond to the request
         xs -> if ((entity $ head xs) == "askQuestionnaire" )
-         then askQuestionnaire 3--(read $ value $ head entity_)
+         then runQuestionnaire --(read $ value $ head entity_)
          else tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
       --return "k"
 
 -- nlp can produce a list of possible meaning, so we will try them all for now.
 -- the algorithm can be improved
-tryWithDiffrentEntities :: [Entity] -> Process String
+tryWithDiffrentEntities :: [Entity] -> Process String   
 tryWithDiffrentEntities [] = nonUnderstandingHandler
 tryWithDiffrentEntities (x:xs) = do
     env <- ask
@@ -133,9 +133,9 @@ runQuestionnaire = do
 
 runProcess_ :: TxtMessage -> Process String -> LIO ACC String
 runProcess_ msg process = do
-  uId <- label L (userid msg)
+  uId <- label H (userid msg)
   prv <- getPrevilegeDB uId
-  message <- label L msg
+  message <- label H msg
   rs <- runExceptT (runReaderT process (St {txtmsg = message, Process.previlege = prv}))
   case rs of
     Left rslt  -> return rslt
@@ -143,5 +143,5 @@ runProcess_ msg process = do
 
 runProcess :: TxtMessage -> Process String -> IO String
 runProcess msg process = do
-  let lioSt = LIOState {lioLabel = L, lioClearance = L}
+  let lioSt = LIOState {lioLabel = H, lioClearance = H}
   evalLIO  (runProcess_ msg process) lioSt

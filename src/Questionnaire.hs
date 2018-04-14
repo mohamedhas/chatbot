@@ -25,7 +25,7 @@ data QstTrace = QstTrace {
                 }  deriving (Show, Generic)
 
 
-modifyTrace :: Trace String -> QstTrace -> QstTrace
+modifyTrace :: Trace String String -> QstTrace -> QstTrace
 modifyTrace answr qstTrace =
       qstTrace { trace = show answr }
 
@@ -38,10 +38,10 @@ addQstResult answr qstTrace =
   modifyTrace (read ((read (trace qstTrace)) ++
                                     (read $ "Result " ++ answr) )) qstTrace
 
-parseItemList :: String -> [(Item String)]
+parseItemList :: String -> [(Item String String)]
 parseItemList str = read str
 
-parseTrace :: String -> Trace String
+parseTrace :: String -> Trace String String
 parseTrace qstTrace = read qstTrace --( (parseItemList (trace qstTrace)), [])
 
 instance Model QstTrace where

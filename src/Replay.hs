@@ -15,21 +15,21 @@ import LIO.Core
 import Lattice
 
 {- i ve transformed the trace to a tuple of "(originalTrace, newTrace)" -}
-type Trace r = ([Item r], [Item r])
+type Trace r q = ([Item r q], [Item r q])
 
-data Item r = Answer r | Result String
+data Item r q = Answer r (Maybe q) | Result String | Approval Bool
   deriving (Show, Read)
 
 
-emptyTrace :: Trace r
+emptyTrace :: Trace r q
 emptyTrace = ([], [])
 
-addAnswer :: Trace r -> r -> Trace r
-addAnswer (trace, output) re = (trace ++ [(Answer re)], output)
+addAnswer :: Trace r q -> r -> Trace r q
+addAnswer (trace, output) re = (trace ++ [(Answer re Nothing)], output)
 
-type Replay q r  = ReplayT IO q r
+type Replay q r = ReplayT IO q r
 
-type ReplayT m q r  = StateT (Trace r) (ExceptT (q, Trace r) m)
+type ReplayT m q r  = StateT (Trace r q) (ExceptT (q, Trace r q) m)
 
 helperFunction :: (Monad m, Show a, Read a) => m a -> ReplayT m q r a
 helperFunction i = do
@@ -44,26 +44,40 @@ liftR :: (Monad m, Show a, Read a) => m a -> ReplayT m q r a
 liftR i = do
   trace' <- get
   case trace' of
-    ((Answer aswr):trace, output) -> error $ "undifined"
-    ([], output)                  -> helperFunction i
-    ((Result rslt):trace, output) -> put (trace, output ++ [(Result rslt)]) >>=
+    ((Answer aswr Nothing):trace, output)   -> error $ "undifined"
+    ([], output)                    -> helperFunction i
+    ((Result rslt):trace, output)   -> put (trace, output ++ [(Result rslt)]) >>=
                                       \_ -> return $ read rslt
+    ((Approval rslt):trace, output) -> error $ "undifined"
 
 -- io :: (Show a, Read a) => IO a -> Replay q r a
 -- io i = liftR i
+--y = \f -> (\x -> f (x x)) (\x -> f (x x))
 
 io :: (Show a, Read a) => LIO ACC a -> ReplayT (LIO ACC) q r a
 io i = liftR i
+
+verifyAnswer :: (Monad m, Read r) => (r -> Bool) -> ReplayT m q r ()
+verifyAnswer pred = do
+    trace' <- get
+    case trace' of
+      ((Approval rslt):trace, output) -> put (trace, output) >>= return
+    --((Answer answr (Just qst)):trace, output)  ->
+      ([], (Answer answr (Just qst)):output) ->
+            if (pred answr) then put (([], output ++ [(Approval True)]))
+              else throwError (qst, (output, []))
+
 
 ask :: (Monad m) => q -> ReplayT m q r r
 ask qst = do
   trace' <- get
   case trace' of
-    ((Answer answr):trace, output) ->
-        put (trace, output ++ [(Answer answr)]) >>= \_ -> return answr
+    ((Answer answr Nothing):trace, output) ->
+        put (trace, output ++ [(Answer answr $ Just qst)]) >>= \_ -> return answr
     ((Result str):trace, output)   -> throwError (qst, (output, []))
     ([], output)                   -> throwError (qst, (output, []))
+    ((Approval rslt):trace, output) -> error $ "undifined"
 
 
-run :: (Monad m) => ReplayT m q r a -> Trace r -> m (Either (q, Trace r) a)
+run :: (Monad m) => ReplayT m q r a -> Trace r q -> m (Either (q, Trace r q) a)
 run replay trace = runExceptT (evalStateT replay trace)

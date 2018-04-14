@@ -58,7 +58,7 @@ getLastContextObjDB ident = do
     iden  <-  unlabel ident
     lastCtxt <- ioTCB $ getDataBasedOnUserId iden id
     p <- label H lastCtxt
-    setLabelP (PrivTCB AdminPriv) L
+    --setLabelP (PrivTCB AdminPriv) L
     return p
 
 
