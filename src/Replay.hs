@@ -68,7 +68,7 @@ verifyAnswer pred = do
               else throwError (qst, (output, []))
 
 
-ask :: (Monad m, Show q, Show r) => q -> ReplayT m q r r
+ask :: (Monad m) => q -> ReplayT m q r r
 ask qst = do
   trace' <- get
   case trace' of
@@ -79,7 +79,6 @@ ask qst = do
     ((Result str):trace, output)   -> throwError (qst, (output, []))
     ([], output)                   -> throwError (qst, (output, []))
     ((Approval rslt):trace, output) -> error $ "undifined"
-    (trace, output) -> error $ ((show trace) ++ (show output))
 
 run :: (Monad m) => ReplayT m q r a -> Trace r q -> m (Either (q, Trace r q) a)
 run replay trace = runExceptT (evalStateT replay trace)
