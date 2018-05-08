@@ -38,6 +38,9 @@ addQstResult answr qstTrace =
   modifyTrace (read ((read (trace qstTrace)) ++
                                     (read $ "Result " ++ answr) )) qstTrace
 
+verify :: ( String -> Bool) -> QstTrace
+verify pred = addQstAnswer pred 
+
 parseItemList :: String -> [(Item String String)]
 parseItemList str = read str
 

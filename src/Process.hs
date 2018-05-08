@@ -40,7 +40,7 @@ getField f v = do
   label l (f rslt)
 
 
--- a Monad that process the messages then it try to get a the best response
+-- a Monad that process the messages and tries to get the best response
 -- TODO Manage Exceptions in a better way
 type Process = ReaderT St (ExceptT String (LIO ACC))
 
@@ -58,11 +58,11 @@ getResponse = do
         xs -> if ((entity $ head xs) == "askQuestionnaire" )
          then runQuestionnaire --(read $ value $ head entity_)
          else tryWithDiffrentEntities xs  -- else we try to get the base response based on what state 'context' we are in
-      --return "k"
+
 
 -- nlp can produce a list of possible meaning, so we will try them all for now.
 -- the algorithm can be improved
-tryWithDiffrentEntities :: [Entity] -> Process String   
+tryWithDiffrentEntities :: [Entity] -> Process String
 tryWithDiffrentEntities [] = nonUnderstandingHandler
 tryWithDiffrentEntities (x:xs) = do
     env <- ask
@@ -84,8 +84,7 @@ runQuestionnaire = do
   usrId    <- liftLio (getUserId (txtmsg env ) )
   qstTrace <- liftLio $ getTraceDB usrId
   message  <- liftLio $ unlabel (txtmsg env)
-  lastCtxt <- liftLio (getLastContextObjDB usrId) -- >>=
-                                        -- \x -> getClearance >>= \y -> label y x)
+  lastCtxt <- liftLio (getLastContextObjDB usrId)
   let trace' = addQstAnswer (msg message) qstTrace
   rslt <- lift $ lift $ run (questionnaireExample lastCtxt) (read $ trace trace')
   case rslt of
@@ -94,42 +93,14 @@ runQuestionnaire = do
       return $ fst rslt
     Right rslt -> nonUnderstandingHandler
 
+
 askQuestionnaire :: UserId -> Process String
 askQuestionnaire id = do
   env <- asks txtmsg
   usrId    <- liftLio (getClearance >>= \x -> (label x id) )
-  --message  <- liftLio $ unlabel (txtmsg env)
   lastCtxt <- liftLio (getLastContextObjDB usrId)
-                                      --  \x -> getClearance >>= \y -> label y x)
-  --liftLio $ modifyLastContext_ lastCtxt
-  --l <- liftLio getClearance
-  --if (canFlowTo l H) then do
   liftLio (modifyLastContext_ lastCtxt)
-                        --  return "done"
-                     --else return "you are not an admin"
-  --return $ evalLIO (modifyLastContext_ lastCtxt)
-  --          (LIOState {lioLabel = l, lioClearance = H})
 
-
-
-{-
-runQuestionnaire :: Process String
-runQuestionnaire = do
-  env <- ask
-  usrId <- lift $ lift (getUserId (txtmsg env ) )
-  qstTrace <- lift $ lift $ getTraceDB usrId
-  message <- lift $ lift $ unlabel (txtmsg env)
-  let trace = parseTrace $ addQstAnswer (msg message) qstTrace
-  rslt <- lift $ lift $ run questionnaireExample trace
-  case rslt of
-    Left rslt  -> return $ fst rslt
-    Right rslt -> nonUnderstandingHandler
-
-    uId <- evalLIO (label L (userid msg)) lioSt
-    l   <- evalLIO (getPrevilegeDB uId ) lioSt
-    let userState = LIOState {lioLabel = L, lioClearance = L}
-    st   <- evalLIO (label L msg ) userState
--}
 
 runProcess_ :: TxtMessage -> Process String -> LIO ACC String
 runProcess_ msg process = do
@@ -140,6 +111,7 @@ runProcess_ msg process = do
   case rs of
     Left rslt  -> return rslt
     Right rslt -> return rslt
+
 
 runProcess :: TxtMessage -> Process String -> IO String
 runProcess msg process = do

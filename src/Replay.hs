@@ -50,9 +50,6 @@ liftR i = do
                                       \_ -> return $ read rslt
     ((Approval rslt):trace, output) -> error $ "undifined"
 
--- io :: (Show a, Read a) => IO a -> Replay q r a
--- io i = liftR i
---y = \f -> (\x -> f (x x)) (\x -> f (x x))
 
 io :: (Show a, Read a) => LIO ACC a -> ReplayT (LIO ACC) q r a
 io i = liftR i
@@ -62,7 +59,6 @@ verifyAnswer pred = do
     trace' <- get
     case trace' of
       ((Approval rslt):trace, output) -> put (trace, output) >>= return
-    --((Answer answr (Just qst)):trace, output)  ->
       ([], (Answer answr (Just qst)):output) ->
             if (pred answr) then put (([], output ++ [(Approval True)]))
               else throwError (qst, (output, []))

@@ -10,7 +10,7 @@ import TxtMessage
 import Data.Text.Lazy
 
 
--- the program will recivie a json object, parse it and then it will process it
+-- the program will recivie a json object, parse it and then process it
 main :: IO ()
 main = scotty 3000 $ do
     get "/" serve
