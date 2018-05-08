@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Questionnaire where
 
-import Replay (run, ask, io, Replay, ReplayT, Trace, emptyTrace, addAnswer, Item)
+import Replay (run, ask, io, Replay, ReplayT, Trace, emptyTrace, verifyAnswer,
+                                                                addAnswer, Item)
 import GHC.Generics
 import Lattice
 import LIO.Labeled
@@ -38,14 +39,11 @@ addQstResult answr qstTrace =
   modifyTrace (read ((read (trace qstTrace)) ++
                                     (read $ "Result " ++ answr) )) qstTrace
 
-verify :: ( String -> Bool) -> QstTrace
-verify pred = addQstAnswer pred 
-
 parseItemList :: String -> [(Item String String)]
 parseItemList str = read str
 
 parseTrace :: String -> Trace String String
-parseTrace qstTrace = read qstTrace --( (parseItemList (trace qstTrace)), [])
+parseTrace qstTrace = read qstTrace
 
 instance Model QstTrace where
   modelInfo = defaultModelInfo { modelTable = "qst_trace" }
@@ -62,7 +60,7 @@ getTraceDB ident = do
 
 saveTrace ::  QstTrace -> LIO ACC QstTrace
 saveTrace ctx = do
-  ioTCB $ connect connectionInfo >>= \x -> save x ctx -- >>= \y -> return $ show y
+  ioTCB $ connect connectionInfo >>= \x -> save x ctx
 
 type Questionnaire = ReplayT (LIO ACC) String String String
 

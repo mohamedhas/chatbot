@@ -30,7 +30,7 @@ version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/moh/.cabal/bin"
-libdir     = "/home/moh/.cabal/lib/x86_64-linux-ghc-8.0.1/project-0.1.0.0"
+libdir     = "/home/moh/.cabal/lib/x86_64-linux-ghc-8.0.1/project-0.1.0.0-49AsCYYBlRxEJYKUCaUdnA"
 dynlibdir  = "/home/moh/.cabal/lib/x86_64-linux-ghc-8.0.1"
 datadir    = "/home/moh/.cabal/share/x86_64-linux-ghc-8.0.1/project-0.1.0.0"
 libexecdir = "/home/moh/.cabal/libexec"

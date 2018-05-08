@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Replay (run, ask, io, Replay, ReplayT, Trace,
-               emptyTrace, addAnswer, Item) where
+               emptyTrace, addAnswer, Item, verifyAnswer) where
 
 import System.IO.Unsafe
 import Control.Applicative (Applicative(..))

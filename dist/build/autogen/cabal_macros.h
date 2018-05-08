@@ -7,12 +7,68 @@
   (major1) == 0 && (major2) <  1 || \
   (major1) == 0 && (major2) == 1 && (minor) <= 0)
 
+/* package aeson-1.2.3.0 */
+#define VERSION_aeson "1.2.3.0"
+#define MIN_VERSION_aeson(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  2 || \
+  (major1) == 1 && (major2) == 2 && (minor) <= 3)
+
 /* package base-4.9.0.0 */
 #define VERSION_base "4.9.0.0"
 #define MIN_VERSION_base(major1,major2,minor) (\
   (major1) <  4 || \
   (major1) == 4 && (major2) <  9 || \
   (major1) == 4 && (major2) == 9 && (minor) <= 0)
+
+/* package lio-0.11.6.0 */
+#define VERSION_lio "0.11.6.0"
+#define MIN_VERSION_lio(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  11 || \
+  (major1) == 0 && (major2) == 11 && (minor) <= 6)
+
+/* package mtl-2.2.1 */
+#define VERSION_mtl "2.2.1"
+#define MIN_VERSION_mtl(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  2 || \
+  (major1) == 2 && (major2) == 2 && (minor) <= 1)
+
+/* package postgresql-orm-0.5.0 */
+#define VERSION_postgresql_orm "0.5.0"
+#define MIN_VERSION_postgresql_orm(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 0)
+
+/* package postgresql-simple-0.5.3.0 */
+#define VERSION_postgresql_simple "0.5.3.0"
+#define MIN_VERSION_postgresql_simple(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 3)
+
+/* package text-1.2.2.1 */
+#define VERSION_text "1.2.2.1"
+#define MIN_VERSION_text(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  2 || \
+  (major1) == 1 && (major2) == 2 && (minor) <= 2)
+
+/* package transformers-0.5.2.0 */
+#define VERSION_transformers "0.5.2.0"
+#define MIN_VERSION_transformers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 2)
+
+/* package scotty-0.11.0 */
+#define VERSION_scotty "0.11.0"
+#define MIN_VERSION_scotty(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  11 || \
+  (major1) == 0 && (major2) == 11 && (minor) <= 0)
 
 /* tool alex-3.1.7 */
 #define TOOL_VERSION_alex "3.1.7"
@@ -91,7 +147,7 @@
   (major1) == 2 && (major2) <  28 || \
   (major1) == 2 && (major2) == 28 && (minor) <= 0)
 
-#define CURRENT_COMPONENT_ID "project-0.1.0.0"
+#define CURRENT_COMPONENT_ID "project-0.1.0.0-49AsCYYBlRxEJYKUCaUdnA"
 
-#define CURRENT_PACKAGE_KEY "project-0.1.0.0"
+#define CURRENT_PACKAGE_KEY "project-0.1.0.0-49AsCYYBlRxEJYKUCaUdnA"
 
